@@ -1,0 +1,107 @@
+# MiniCRM Cargo构建配置
+# 优化构建过程和开发体验
+
+[build]
+# 默认目标平台
+# target = "x86_64-unknown-linux-gnu"  # 根据需要调整
+
+# 并行作业数（根据CPU核心数调整）
+jobs = 4
+
+# 增量编译（开发时启用）
+incremental = true
+
+# 目标目录
+target-dir = "target"
+
+[target.x86_64-apple-darwin]
+# macOS特定配置
+rustflags = [
+    "-C",
+    "link-arg=-Wl,-rpath,@loader_path",
+    "-C",
+    "target-cpu=native",
+]
+
+[target.x86_64-pc-windows-msvc]
+# Windows特定配置
+rustflags = ["-C", "target-cpu=native"]
+
+[target.x86_64-unknown-linux-gnu]
+# Linux特定配置
+rustflags = ["-C", "link-arg=-Wl,-rpath,$ORIGIN", "-C", "target-cpu=native"]
+
+# 注册表配置 - 使用官方源
+[registries.crates-io]
+protocol = "sparse"
+
+# 源替换（如果需要使用镜像）
+# [source.crates-io]
+# replace-with = "vendored-sources"
+
+# [source.vendored-sources]
+# directory = "vendor"
+
+# 别名配置
+[alias]
+# 常用命令别名
+b = "build"
+c = "check"
+t = "test"
+r = "run"
+rr = "run --release"
+
+# 代码质量检查
+lint = "clippy --all-targets --all-features -- -D warnings"
+fmt-check = "fmt --all -- --check"
+security-audit = "audit"
+
+# 完整的质量检查流程
+quality = [
+    "fmt --all -- --check",
+    "clippy --all-targets --all-features -- -D warnings",
+    "test --all-features",
+    "security-audit",
+]
+
+# 清理命令
+clean-all = ["clean", "update"]
+
+# 发布准备
+release-prep = [
+    "fmt --all",
+    "clippy --all-targets --all-features -- -D warnings",
+    "test --all-features --release",
+    "security-audit",
+    "build --release",
+]
+
+# 环境变量
+[env]
+# Rust编译器标志
+RUSTFLAGS = "-D warnings"
+
+# 启用彩色输出
+CARGO_TERM_COLOR = "always"
+
+# 网络配置
+[net]
+retry = 3
+git-fetch-with-cli = true
+
+# HTTP配置
+[http]
+timeout = 30
+multiplexing = true
+user-agent = "minicrm-cargo"
+
+# 构建缓存配置
+[profile.dev]
+# 开发配置已在主Cargo.toml中定义
+
+[profile.release]
+# 发布配置已在主Cargo.toml中定义
+
+# 测试配置
+[profile.test]
+# 测试配置已在主Cargo.toml中定义

@@ -1,0 +1,59 @@
+# MiniCRM EditorConfig配置
+# 确保不同编辑器的一致性
+
+root = true
+
+# 所有文件的默认配置
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Rust源文件
+[*.rs]
+indent_style = space
+indent_size = 4
+max_line_length = 100
+
+# Slint UI文件
+[*.slint]
+indent_style = space
+indent_size = 4
+max_line_length = 100
+
+# TOML配置文件
+[*.toml]
+indent_style = space
+indent_size = 2
+
+# JSON文件
+[*.json]
+indent_style = space
+indent_size = 2
+
+# YAML文件
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Markdown文件
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = 80
+
+# Shell脚本
+[*.sh]
+indent_style = space
+indent_size = 2
+
+# Makefile
+[Makefile]
+indent_style = tab
+
+# 忽略生成的文件
+[target/**]
+indent_style = unset
+indent_size = unset

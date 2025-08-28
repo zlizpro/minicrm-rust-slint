@@ -1,0 +1,66 @@
+# MiniCRM Rust代码格式化配置
+# 遵循Rust官方代码风格指南和最佳实践
+
+# 基础配置
+edition = "2021"
+version = "Two"
+unstable_features = false
+
+# 缩进和空白
+hard_tabs = false
+tab_spaces = 4
+newline_style = "Unix"
+use_small_heuristics = "Default"
+
+# 行长度
+max_width = 100
+comment_width = 80
+wrap_comments = true
+
+# 导入和使用声明
+imports_granularity = "Crate"
+imports_layout = "Mixed"
+group_imports = "StdExternalCrate"
+reorder_imports = true
+reorder_modules = true
+
+# 函数和方法
+fn_args_layout = "Tall"
+brace_style = "SameLineWhere"
+control_brace_style = "AlwaysSameLine"
+indent_style = "Block"
+
+# 结构体和枚举
+struct_field_align_threshold = 0
+enum_discrim_align_threshold = 0
+
+# 字符串和数组
+format_strings = true
+format_macro_matchers = true
+format_code_in_doc_comments = true
+
+# 空行和空格
+blank_lines_upper_bound = 1
+blank_lines_lower_bound = 0
+empty_item_single_line = true
+struct_lit_single_line = true
+fn_single_line = false
+
+# 注释
+normalize_comments = true
+normalize_doc_attributes = true
+format_doc_comments = true
+
+# 其他格式化选项
+remove_nested_parens = true
+use_field_init_shorthand = true
+force_explicit_abi = true
+condense_wildcard_suffixes = false
+color = "Auto"
+required_version = "1.5.1"
+
+# 特殊处理
+ignore = [
+    "target/",
+    "build.rs"
+]

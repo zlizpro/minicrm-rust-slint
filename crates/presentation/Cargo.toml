@@ -1,0 +1,13 @@
+[package]
+name = "minicrm-presentation"
+version = "0.1.0"
+edition = "2021"
+description = "MiniCRM 表示层 - UI控制器和视图模型"
+
+[dependencies]
+minicrm-core = { path = "../core" }
+minicrm-application = { path = "../application" }
+slint = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }

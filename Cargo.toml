@@ -1,0 +1,205 @@
+[package]
+name = "minicrm"
+version = "0.1.0"
+edition = "2021"
+authors = ["MiniCRM Team"]
+description = "专为板材行业设计的跨平台客户关系管理系统"
+license = "MIT"
+repository = "https://github.com/minicrm/minicrm-rust-slint"
+keywords = ["crm", "slint", "gui", "database", "cross-platform"]
+categories = ["gui", "database"]
+rust-version = "1.70"
+
+[workspace]
+members = [
+    ".",
+    "crates/core",
+    "crates/infrastructure",
+    "crates/domain",
+    "crates/application",
+    "crates/presentation",
+]
+resolver = "2"
+
+[workspace.dependencies]
+# 工作空间依赖版本统一管理
+# 确保所有crate使用相同版本的依赖，避免版本冲突
+
+# 核心依赖 - 基础功能
+tokio = { version = "1.35", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.6", features = ["v4", "serde"] }
+anyhow = "1.0"
+thiserror = "1.0"
+
+# 数据库相关 - SQLite集成
+rusqlite = { version = "0.29", features = ["bundled", "chrono", "serde_json"] }
+r2d2 = "0.8"
+r2d2_sqlite = "0.22"
+
+# 验证和序列化 - 数据处理
+validator = { version = "0.18", features = ["derive"] }
+regex = "1.10"
+
+# GUI框架 - Slint UI
+slint = { version = "1.3", features = ["backend-winit", "renderer-femtovg"] }
+
+# 日志和配置 - 可观测性
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+config = { version = "0.14", default-features = false, features = [
+    "toml",
+    "json",
+] }
+
+# 异步相关 - 并发处理
+async-trait = "0.1"
+futures = "0.3"
+
+# 测试相关 - 开发工具
+mockall = "0.12"
+tempfile = "3.8"
+
+[dependencies]
+# 主应用程序依赖
+slint = { workspace = true, optional = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+config = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+rusqlite = { workspace = true }
+
+# 内部crate依赖
+minicrm-core = { path = "crates/core" }
+minicrm-infrastructure = { path = "crates/infrastructure" }
+minicrm-domain = { path = "crates/domain" }
+minicrm-application = { path = "crates/application" }
+minicrm-presentation = { path = "crates/presentation" }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[build-dependencies]
+slint-build = "1.3"
+chrono = { workspace = true }
+
+# 代码质量和安全配置
+[lints.rust]
+unsafe_code = "warn"                   # Slint生成的代码需要使用unsafe，所以改为warn
+missing_docs = "warn"
+missing_debug_implementations = "warn"
+rust_2018_idioms = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "warn"
+unimplemented = "deny"
+
+# 构建配置优化
+# 平衡性能、调试信息和编译速度
+
+# 发布配置 - 最大性能优化
+[profile.release]
+opt-level = 3            # 最高优化级别
+lto = true               # 链接时优化，提升性能
+codegen-units = 1        # 单个代码生成单元，更好的优化
+panic = "abort"          # panic时直接终止，减少二进制大小
+strip = true             # 移除调试符号，减少二进制大小
+overflow-checks = false  # 发布版本禁用溢出检查以提升性能
+debug = false            # 发布版本不包含调试信息
+debug-assertions = false # 禁用调试断言
+
+# 开发配置 - 快速编译和调试友好
+[profile.dev]
+opt-level = 0                # 无优化，最快编译速度
+debug = true                 # 包含完整调试信息
+split-debuginfo = "unpacked" # 调试信息分离，加速链接
+overflow-checks = true       # 开发时启用溢出检查
+debug-assertions = true      # 启用调试断言
+incremental = true           # 启用增量编译
+
+# 测试配置 - 平衡编译速度和运行性能
+[profile.test]
+opt-level = 1           # 轻度优化，平衡编译速度和测试性能
+debug = true            # 保留调试信息用于测试调试
+overflow-checks = true  # 测试时保持溢出检查
+debug-assertions = true # 测试时保持调试断言
+
+# 基准测试配置 - 接近发布版本的性能
+[profile.bench]
+opt-level = 3           # 高优化级别
+debug = false           # 不包含调试信息
+overflow-checks = false # 禁用溢出检查以获得准确的性能数据
+lto = true              # 启用链接时优化
+codegen-units = 1       # 单个代码生成单元
+
+# 发布调试配置 - 发布版本但保留调试信息
+[profile.release-with-debug]
+inherits = "release" # 继承发布配置
+debug = true         # 但保留调试信息
+strip = false        # 不移除调试符号
+
+# 特性标志配置
+# 允许条件编译不同的功能模块
+[features]
+default = ["gui"] # 默认启用GUI界面
+gui = ["slint"]   # GUI界面支持
+cli = []          # 命令行界面支持
+debug-tools = []  # 调试工具（仅开发时使用）
+
+# 包元数据
+[package.metadata]
+# 最小支持的Rust版本
+msrv = "1.70.0"
+
+# 文档配置
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+# 安全审计配置
+[package.metadata.audit]
+# 忽略的安全公告ID（谨慎使用）
+ignore = []
+
+# 安全依赖版本 - 修复已知漏洞
+idna = "1.1.0"
+
+
+# Cargo配置
+[workspace.metadata.cargo-machete]
+# 忽略未使用的依赖检查（某些依赖可能只在特定条件下使用）
+ignored = []
+
+# 工作空间lint配置继承
+[workspace.lints.rust]
+unsafe_code = "warn"
+missing_docs = "warn"
+missing_debug_implementations = "warn"
+rust_2018_idioms = "warn"
+unused_extern_crates = "warn"
+unused_import_braces = "warn"
+unused_qualifications = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "warn"
+unimplemented = "deny"
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"

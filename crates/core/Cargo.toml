@@ -1,0 +1,15 @@
+[package]
+name = "minicrm-core"
+version = "0.1.0"
+edition = "2021"
+description = "MiniCRM 核心模块 - 定义基础trait和通用类型"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+validator = { workspace = true }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }

@@ -1,0 +1,132 @@
+// MiniCRM 主窗口界面定义
+// 专为板材行业设计的客户关系管理系统主界面
+
+import { Button, VerticalBox, HorizontalBox } from "std-widgets.slint";
+
+// 主窗口组件
+export component MainWindow inherits Window {
+    title: "MiniCRM - 板材行业客户管理系统";
+    preferred-width: 1280px;
+    preferred-height: 800px;
+    min-width: 1024px;
+    min-height: 768px;
+
+    // 窗口属性
+    in-out property <string> status-message: "系统就绪";
+
+    // 回调函数
+    callback show-about();
+    callback exit-application();
+
+    // 主布局
+    VerticalBox {
+        padding: 16px;
+        spacing: 16px;
+
+        // 标题区域
+        header := Rectangle {
+            height: 80px;
+            background: @linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+            border-radius: 8px;
+
+            HorizontalBox {
+                padding: 20px;
+                alignment: center;
+
+                Text {
+                    text: "MiniCRM";
+                    font-size: 28px;
+                    font-weight: 700;
+                    color: white;
+                }
+
+                Rectangle {
+                    // 占位符，用于居中对齐
+                }
+
+                Text {
+                    text: "板材行业客户管理系统";
+                    font-size: 16px;
+                    color: #e3f2fd;
+                }
+            }
+        }
+
+        // 主内容区域
+        content := Rectangle {
+            background: #f8f9fa;
+            border-width: 1px;
+            border-color: #dee2e6;
+            border-radius: 8px;
+
+            VerticalBox {
+                padding: 40px;
+                alignment: center;
+                spacing: 20px;
+
+                Text {
+                    text: "欢迎使用 MiniCRM";
+                    font-size: 24px;
+                    font-weight: 600;
+                    color: #495057;
+                }
+
+                Text {
+                    text: "系统正在初始化中...";
+                    font-size: 16px;
+                    color: #6c757d;
+                }
+
+                HorizontalBox {
+                    spacing: 16px;
+                    alignment: center;
+
+                    Button {
+                        text: "关于系统";
+                        clicked => {
+                            show-about();
+                        }
+                    }
+
+                    Button {
+                        text: "退出";
+                        clicked => {
+                            exit-application();
+                        }
+                    }
+                }
+            }
+        }
+
+        // 状态栏
+        status-bar := Rectangle {
+            height: 32px;
+            background: #e9ecef;
+            border-radius: 4px;
+
+            HorizontalBox {
+                padding-left: 12px;
+                padding-right: 12px;
+                alignment: start;
+
+                Text {
+                    text: status-message;
+                    font-size: 12px;
+                    color: #495057;
+                    vertical-alignment: center;
+                }
+
+                Rectangle {
+                    // 占位符，用于推送右侧内容
+                }
+
+                Text {
+                    text: "版本: 0.1.0";
+                    font-size: 12px;
+                    color: #6c757d;
+                    vertical-alignment: center;
+                }
+            }
+        }
+    }
+}

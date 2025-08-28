@@ -1,0 +1,281 @@
+{
+  "name": "代码重构建议",
+  "description": "分析代码质量问题并提供智能重构建议，帮助改善代码结构",
+  "trigger": {
+    "type": "manual",
+    "also_trigger_on": [
+      {
+        "type": "scheduled",
+        "schedule": "weekly"
+      },
+      {
+        "type": "quality_threshold_exceeded"
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "代码异味检测",
+      "type": "code_smell_detection",
+      "patterns": [
+        {
+          "name": "长函数",
+          "threshold": 50,
+          "severity": "medium",
+          "suggestion": "将长函数拆分为多个小函数"
+        },
+        {
+          "name": "大类",
+          "threshold": 500,
+          "severity": "medium", 
+          "suggestion": "考虑将大类拆分为多个职责单一的类"
+        },
+        {
+          "name": "重复代码",
+          "threshold": 6,
+          "severity": "high",
+          "suggestion": "提取公共函数或使用泛型减少重复"
+        },
+        {
+          "name": "深层嵌套",
+          "threshold": 4,
+          "severity": "medium",
+          "suggestion": "使用早期返回或提取函数减少嵌套"
+        },
+        {
+          "name": "长参数列表",
+          "threshold": 5,
+          "severity": "low",
+          "suggestion": "使用结构体或配置对象封装参数"
+        },
+        {
+          "name": "神奇数字",
+          "pattern": "hardcoded_numbers",
+          "severity": "low",
+          "suggestion": "将魔法数字提取为命名常量"
+        }
+      ]
+    },
+    {
+      "name": "设计模式建议",
+      "type": "design_pattern_suggestions",
+      "patterns": [
+        {
+          "name": "策略模式",
+          "condition": "multiple_if_else_chains",
+          "suggestion": "使用策略模式替换复杂的if-else链"
+        },
+        {
+          "name": "工厂模式",
+          "condition": "complex_object_creation",
+          "suggestion": "使用工厂模式简化对象创建"
+        },
+        {
+          "name": "观察者模式",
+          "condition": "event_handling_scattered",
+          "suggestion": "使用观察者模式统一事件处理"
+        },
+        {
+          "name": "装饰器模式",
+          "condition": "behavior_extension_needed",
+          "suggestion": "使用装饰器模式扩展对象行为"
+        }
+      ]
+    },
+    {
+      "name": "SOLID原则检查",
+      "type": "solid_principles_analysis",
+      "principles": [
+        {
+          "name": "单一职责原则",
+          "check": "class_responsibility_analysis",
+          "suggestion": "确保每个类只有一个变更理由"
+        },
+        {
+          "name": "开闭原则",
+          "check": "extension_modification_analysis",
+          "suggestion": "使用抽象和多态支持扩展"
+        },
+        {
+          "name": "里氏替换原则",
+          "check": "substitution_analysis",
+          "suggestion": "确保子类可以替换父类"
+        },
+        {
+          "name": "接口隔离原则",
+          "check": "interface_segregation_analysis",
+          "suggestion": "拆分大接口为多个小接口"
+        },
+        {
+          "name": "依赖倒置原则",
+          "check": "dependency_direction_analysis",
+          "suggestion": "依赖抽象而不是具体实现"
+        }
+      ]
+    },
+    {
+      "name": "性能优化建议",
+      "type": "performance_refactoring",
+      "optimizations": [
+        {
+          "name": "算法优化",
+          "patterns": ["nested_loops", "inefficient_search", "redundant_computation"],
+          "suggestions": [
+            "使用更高效的算法",
+            "添加缓存减少重复计算",
+            "使用适当的数据结构"
+          ]
+        },
+        {
+          "name": "内存优化",
+          "patterns": ["memory_leaks", "excessive_allocation", "large_objects"],
+          "suggestions": [
+            "使用对象池减少分配",
+            "及时释放不需要的资源",
+            "考虑使用流式处理"
+          ]
+        },
+        {
+          "name": "并发优化",
+          "patterns": ["blocking_operations", "race_conditions", "deadlocks"],
+          "suggestions": [
+            "使用异步编程模式",
+            "减少锁的粒度",
+            "使用无锁数据结构"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "可测试性改进",
+      "type": "testability_enhancement",
+      "improvements": [
+        {
+          "name": "依赖注入",
+          "condition": "hard_dependencies",
+          "suggestion": "使用依赖注入提高可测试性"
+        },
+        {
+          "name": "纯函数提取",
+          "condition": "side_effects_in_logic",
+          "suggestion": "将业务逻辑提取为纯函数"
+        },
+        {
+          "name": "接口抽象",
+          "condition": "concrete_dependencies",
+          "suggestion": "为外部依赖创建接口抽象"
+        }
+      ]
+    },
+    {
+      "name": "代码可读性改进",
+      "type": "readability_enhancement",
+      "improvements": [
+        {
+          "name": "命名改进",
+          "patterns": ["unclear_names", "abbreviations", "misleading_names"],
+          "suggestions": [
+            "使用描述性的变量名",
+            "避免使用缩写",
+            "确保名称反映实际用途"
+          ]
+        },
+        {
+          "name": "注释改进",
+          "patterns": ["missing_comments", "outdated_comments", "obvious_comments"],
+          "suggestions": [
+            "为复杂逻辑添加解释性注释",
+            "更新过时的注释",
+            "移除显而易见的注释"
+          ]
+        },
+        {
+          "name": "代码组织",
+          "patterns": ["scattered_related_code", "mixed_abstraction_levels"],
+          "suggestions": [
+            "将相关代码组织在一起",
+            "保持一致的抽象层次"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "重构计划生成",
+      "type": "refactoring_plan",
+      "actions": [
+        {
+          "name": "优先级排序",
+          "criteria": ["impact", "effort", "risk"],
+          "script": "根据影响、工作量和风险对重构任务排序"
+        },
+        {
+          "name": "重构步骤分解",
+          "script": "将大的重构任务分解为小步骤"
+        },
+        {
+          "name": "风险评估",
+          "script": "评估每个重构任务的风险"
+        },
+        {
+          "name": "生成重构清单",
+          "output": ".kiro/plans/refactoring-checklist.md"
+        }
+      ]
+    },
+    {
+      "name": "自动重构建议",
+      "type": "automated_refactoring",
+      "safe_refactorings": [
+        {
+          "name": "提取变量",
+          "pattern": "complex_expressions",
+          "automation": "high"
+        },
+        {
+          "name": "提取函数",
+          "pattern": "code_duplication",
+          "automation": "medium"
+        },
+        {
+          "name": "重命名",
+          "pattern": "unclear_names",
+          "automation": "high"
+        },
+        {
+          "name": "移除死代码",
+          "pattern": "unused_code",
+          "automation": "medium"
+        }
+      ]
+    }
+  ],
+  "reports": [
+    {
+      "name": "代码质量报告",
+      "output": ".kiro/reports/code-quality-report.html",
+      "sections": [
+        "代码异味摘要",
+        "SOLID原则违反",
+        "性能问题",
+        "可测试性问题",
+        "重构建议"
+      ]
+    },
+    {
+      "name": "重构计划",
+      "output": ".kiro/plans/refactoring-plan.md",
+      "format": "markdown_checklist"
+    }
+  ],
+  "notifications": {
+    "high_priority_issues": "🚨 发现高优先级代码质量问题",
+    "refactoring_opportunities": "🔧 识别到重构机会",
+    "automated_fixes_available": "🤖 有可自动修复的问题"
+  },
+  "settings": {
+    "auto_apply_safe_refactorings": false,
+    "create_refactoring_branches": true,
+    "generate_before_after_diffs": true,
+    "timeout": 300
+  }
+}

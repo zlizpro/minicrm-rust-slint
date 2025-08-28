@@ -1,0 +1,231 @@
+{
+  "name": "提交前质量门禁",
+  "description": "Git提交前进行完整的代码质量检查，确保代码符合所有质量标准",
+  "trigger": {
+    "type": "git_pre_commit"
+  },
+  "actions": [
+    {
+      "name": "项目类型检测",
+      "type": "detect_project",
+      "script": "自动检测项目技术栈和配置"
+    },
+    {
+      "name": "代码格式检查",
+      "type": "format_check",
+      "actions": [
+        {
+          "name": "Rust格式检查",
+          "condition": "has_rust_files",
+          "command": "cargo fmt --check",
+          "message": "检查Rust代码格式..."
+        },
+        {
+          "name": "Swift格式检查", 
+          "condition": "has_swift_files",
+          "command": "swift-format lint --recursive Sources/",
+          "message": "检查Swift代码格式..."
+        },
+        {
+          "name": "Python格式检查",
+          "condition": "has_python_files", 
+          "command": "black --check .",
+          "message": "检查Python代码格式..."
+        },
+        {
+          "name": "TypeScript格式检查",
+          "condition": "has_ts_files",
+          "command": "prettier --check .",
+          "message": "检查TypeScript代码格式..."
+        }
+      ]
+    },
+    {
+      "name": "静态代码分析",
+      "type": "static_analysis",
+      "actions": [
+        {
+          "name": "Rust Clippy检查",
+          "condition": "has_rust_files",
+          "command": "cargo clippy --all-targets -- -D warnings",
+          "message": "运行Rust静态分析..."
+        },
+        {
+          "name": "Swift静态分析",
+          "condition": "has_swift_files", 
+          "command": "swiftlint",
+          "message": "运行Swift静态分析..."
+        },
+        {
+          "name": "Python静态分析",
+          "condition": "has_python_files",
+          "commands": [
+            "flake8 .",
+            "mypy .",
+            "bandit -r ."
+          ],
+          "message": "运行Python静态分析..."
+        },
+        {
+          "name": "TypeScript静态分析",
+          "condition": "has_ts_files",
+          "command": "eslint . --ext .ts,.tsx,.js,.jsx",
+          "message": "运行TypeScript静态分析..."
+        }
+      ]
+    },
+    {
+      "name": "代码质量度量",
+      "type": "quality_metrics",
+      "checks": [
+        {
+          "name": "文件大小检查",
+          "rules": {
+            "rust_max_lines": 500,
+            "swift_max_lines": 400, 
+            "python_max_lines": 300,
+            "typescript_max_lines": 400
+          },
+          "message": "检查文件大小限制..."
+        },
+        {
+          "name": "函数复杂度检查",
+          "max_cyclomatic_complexity": 10,
+          "max_function_length": 50,
+          "max_nesting_depth": 4,
+          "message": "检查函数复杂度..."
+        },
+        {
+          "name": "重复代码检查",
+          "tools": {
+            "rust": "cargo-duplicates",
+            "swift": "periphery", 
+            "python": "pylint --disable=all --enable=duplicate-code",
+            "typescript": "jscpd"
+          },
+          "thresholds": {
+            "min_duplicate_lines": 6,
+            "similarity_threshold": 0.8
+          },
+          "message": "检查重复代码..."
+        }
+      ]
+    },
+    {
+      "name": "测试执行",
+      "type": "test_execution",
+      "actions": [
+        {
+          "name": "Rust测试",
+          "condition": "has_rust_files",
+          "command": "cargo test",
+          "message": "运行Rust测试..."
+        },
+        {
+          "name": "Swift测试",
+          "condition": "has_swift_files",
+          "command": "swift test",
+          "message": "运行Swift测试..."
+        },
+        {
+          "name": "Python测试",
+          "condition": "has_python_files",
+          "command": "pytest --cov=. --cov-report=term-missing",
+          "message": "运行Python测试..."
+        },
+        {
+          "name": "TypeScript测试",
+          "condition": "has_ts_files",
+          "command": "npm test",
+          "message": "运行TypeScript测试..."
+        }
+      ]
+    },
+    {
+      "name": "测试覆盖率检查",
+      "type": "coverage_check",
+      "requirements": {
+        "line_coverage": 80.0,
+        "branch_coverage": 70.0
+      },
+      "message": "检查测试覆盖率..."
+    },
+    {
+      "name": "依赖安全检查",
+      "type": "security_audit",
+      "actions": [
+        {
+          "name": "Rust安全审计",
+          "condition": "has_rust_files",
+          "command": "cargo audit",
+          "message": "检查Rust依赖安全..."
+        },
+        {
+          "name": "Python安全审计",
+          "condition": "has_python_files", 
+          "command": "safety check",
+          "message": "检查Python依赖安全..."
+        },
+        {
+          "name": "Node.js安全审计",
+          "condition": "has_node_files",
+          "command": "npm audit",
+          "message": "检查Node.js依赖安全..."
+        }
+      ]
+    },
+    {
+      "name": "构建验证",
+      "type": "build_check",
+      "actions": [
+        {
+          "name": "Rust构建检查",
+          "condition": "has_rust_files",
+          "command": "cargo build --release",
+          "message": "验证Rust构建..."
+        },
+        {
+          "name": "Swift构建检查",
+          "condition": "has_swift_files",
+          "command": "swift build",
+          "message": "验证Swift构建..."
+        },
+        {
+          "name": "TypeScript构建检查",
+          "condition": "has_ts_files",
+          "command": "npm run build",
+          "message": "验证TypeScript构建..."
+        }
+      ]
+    }
+  ],
+  "failure_actions": [
+    {
+      "name": "生成质量报告",
+      "type": "generate_report",
+      "output": ".kiro/reports/quality-report.md"
+    },
+    {
+      "name": "阻止提交",
+      "type": "block_commit",
+      "message": "代码质量检查失败，请修复后重新提交"
+    }
+  ],
+  "success_actions": [
+    {
+      "name": "更新质量指标",
+      "type": "update_metrics",
+      "output": ".kiro/metrics/quality-metrics.json"
+    }
+  ],
+  "notifications": {
+    "start": "🔍 开始提交前质量检查...",
+    "success": "✅ 所有质量检查通过，可以提交",
+    "failure": "❌ 质量检查失败，请查看报告并修复问题"
+  },
+  "settings": {
+    "parallel_execution": true,
+    "timeout": 300,
+    "retry_count": 1
+  }
+}

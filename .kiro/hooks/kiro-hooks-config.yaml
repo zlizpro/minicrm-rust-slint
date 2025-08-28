@@ -1,0 +1,135 @@
+# Kiro Agent Hooks 配置文件
+# 基于 code-generation-guidelines.md 指导方针
+
+hooks:
+  - name: "代码质量检查"
+    id: "code-quality-on-save"
+    description: "文件保存时自动进行代码格式化和质量检查"
+    trigger: "file_save"
+    patterns: ["**/*.rs", "**/*.swift", "**/*.py", "**/*.ts", "**/*.js"]
+    enabled: true
+    script: |
+      #!/bin/bash
+      echo "🔍 正在进行代码质量检查..."
+      
+      # 检查文件大小
+      if [ -f "$KIRO_FILE_PATH" ]; then
+        lines=$(wc -l < "$KIRO_FILE_PATH")
+        if [ $lines -gt 500 ]; then
+          echo "⚠️ 警告: 文件超过500行 ($lines 行)，建议拆分"
+        fi
+      fi
+      
+      # 根据项目类型执行检查
+      if [ -f "Cargo.toml" ]; then
+        echo "🦀 Rust项目检查..."
+        cargo fmt --check || cargo fmt
+        cargo clippy --quiet
+      elif [ -f "Package.swift" ]; then
+        echo "🍎 Swift项目检查..."
+        swift-format format --in-place "$KIRO_FILE_PATH" 2>/dev/null || true
+      elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+        echo "🐍 Python项目检查..."
+        black --check "$KIRO_FILE_PATH" || black "$KIRO_FILE_PATH"
+      elif [ -f "package.json" ]; then
+        echo "📦 Node.js项目检查..."
+        prettier --check "$KIRO_FILE_PATH" || prettier --write "$KIRO_FILE_PATH"
+      fi
+      
+      echo "✅ 代码质量检查完成"
+
+  - name: "测试覆盖率监控"
+    id: "test-coverage-monitor"
+    description: "代码变更后自动运行相关测试"
+    trigger: "file_change"
+    patterns: ["**/*.rs", "**/*.swift", "**/*.py", "**/*.ts"]
+    exclude_patterns: ["**/tests/**", "**/*_test.*", "**/*.test.*"]
+    enabled: true
+    script: |
+      #!/bin/bash
+      echo "📊 开始测试覆盖率检查..."
+      
+      if [ -f "Cargo.toml" ]; then
+        echo "🦀 运行Rust测试..."
+        cargo test --quiet
+      elif [ -f "Package.swift" ]; then
+        echo "🍎 运行Swift测试..."
+        swift test
+      elif [ -f "requirements.txt" ]; then
+        echo "🐍 运行Python测试..."
+        python -m pytest --quiet
+      elif [ -f "package.json" ]; then
+        echo "📦 运行Node.js测试..."
+        npm test
+      fi
+      
+      echo "✅ 测试完成"
+
+  - name: "提交前质量门禁"
+    id: "pre-commit-quality-gate"
+    description: "Git提交前进行完整的代码质量检查"
+    trigger: "git_pre_commit"
+    enabled: true
+    script: |
+      #!/bin/bash
+      echo "🔍 开始提交前质量检查..."
+      
+      # 代码格式检查
+      if [ -f "Cargo.toml" ]; then
+        echo "🦀 Rust项目完整检查..."
+        cargo fmt --check || { echo "❌ 代码格式不正确，请运行 cargo fmt"; exit 1; }
+        cargo clippy --all-targets -- -D warnings || { echo "❌ Clippy检查失败"; exit 1; }
+        cargo test || { echo "❌ 测试失败"; exit 1; }
+      elif [ -f "Package.swift" ]; then
+        echo "🍎 Swift项目完整检查..."
+        swift test || { echo "❌ 测试失败"; exit 1; }
+      elif [ -f "requirements.txt" ]; then
+        echo "🐍 Python项目完整检查..."
+        black --check . || { echo "❌ 代码格式不正确，请运行 black ."; exit 1; }
+        python -m pytest || { echo "❌ 测试失败"; exit 1; }
+      fi
+      
+      echo "✅ 所有质量检查通过，可以提交"
+
+  - name: "依赖安全检查"
+    id: "dependency-security-check"
+    description: "检查依赖安全漏洞和更新"
+    trigger: "manual"
+    enabled: false
+    script: |
+      #!/bin/bash
+      echo "🔒 开始依赖安全检查..."
+      
+      if [ -f "Cargo.toml" ]; then
+        echo "🦀 检查Rust依赖..."
+        cargo audit 2>/dev/null || echo "⚠️ 请安装 cargo-audit: cargo install cargo-audit"
+      elif [ -f "requirements.txt" ]; then
+        echo "🐍 检查Python依赖..."
+        pip list --outdated
+        safety check 2>/dev/null || echo "⚠️ 请安装 safety: pip install safety"
+      elif [ -f "package.json" ]; then
+        echo "📦 检查Node.js依赖..."
+        npm audit
+      fi
+      
+      echo "✅ 依赖检查完成"
+
+  - name: "性能监控"
+    id: "performance-monitor"
+    description: "监控构建性能和代码复杂度"
+    trigger: "manual"
+    enabled: false
+    script: |
+      #!/bin/bash
+      echo "⚡ 开始性能监控..."
+      
+      if [ -f "Cargo.toml" ]; then
+        echo "🦀 Rust性能分析..."
+        cargo build --release --timings
+        echo "📊 构建时间报告生成在 target/cargo-timings/"
+      elif [ -f "Package.swift" ]; then
+        echo "🍎 Swift性能分析..."
+        time swift build -c release
+      fi
+      
+      echo "✅ 性能监控完成"

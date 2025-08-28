@@ -1,0 +1,144 @@
+{
+  "name": "代码质量检查 - 文件保存时",
+  "description": "文件保存时自动进行代码格式化、基本质量检查和简单修复",
+  "trigger": {
+    "type": "file_save",
+    "patterns": ["**/*.rs", "**/*.swift", "**/*.py", "**/*.ts", "**/*.js"]
+  },
+  "conditions": [
+    {
+      "type": "file_size",
+      "max_lines": 500,
+      "message": "文件超过500行，建议拆分"
+    }
+  ],
+  "actions": [
+    {
+      "name": "检测项目类型",
+      "type": "detect_project_type",
+      "script": "检测当前项目使用的技术栈"
+    },
+    {
+      "name": "Rust项目处理",
+      "type": "conditional",
+      "condition": "file_exists('Cargo.toml')",
+      "actions": [
+        {
+          "name": "Rust格式化",
+          "type": "command",
+          "command": "cargo fmt --check",
+          "on_error": "cargo fmt",
+          "message": "正在格式化Rust代码..."
+        },
+        {
+          "name": "Clippy检查",
+          "type": "command", 
+          "command": "cargo clippy --all-targets -- -D warnings",
+          "message": "正在运行Clippy代码检查..."
+        },
+        {
+          "name": "文档检查",
+          "type": "command",
+          "command": "cargo doc --no-deps --document-private-items",
+          "message": "检查文档生成..."
+        }
+      ]
+    },
+    {
+      "name": "Swift项目处理",
+      "type": "conditional", 
+      "condition": "file_exists('Package.swift')",
+      "actions": [
+        {
+          "name": "Swift格式化",
+          "type": "command",
+          "command": "swift-format format --in-place $FILE_PATH",
+          "message": "正在格式化Swift代码..."
+        },
+        {
+          "name": "SwiftLint检查",
+          "type": "command",
+          "command": "swiftlint lint --path $FILE_PATH",
+          "message": "正在运行SwiftLint检查..."
+        }
+      ]
+    },
+    {
+      "name": "Python项目处理",
+      "type": "conditional",
+      "condition": "file_exists('requirements.txt') || file_exists('pyproject.toml')",
+      "actions": [
+        {
+          "name": "Black格式化",
+          "type": "command", 
+          "command": "black --check $FILE_PATH",
+          "on_error": "black $FILE_PATH",
+          "message": "正在格式化Python代码..."
+        },
+        {
+          "name": "Flake8检查",
+          "type": "command",
+          "command": "flake8 $FILE_PATH",
+          "message": "正在运行Flake8检查..."
+        },
+        {
+          "name": "MyPy类型检查",
+          "type": "command",
+          "command": "mypy $FILE_PATH",
+          "message": "正在进行类型检查..."
+        }
+      ]
+    },
+    {
+      "name": "TypeScript/JavaScript项目处理",
+      "type": "conditional",
+      "condition": "file_exists('package.json')",
+      "actions": [
+        {
+          "name": "Prettier格式化",
+          "type": "command",
+          "command": "prettier --check $FILE_PATH",
+          "on_error": "prettier --write $FILE_PATH", 
+          "message": "正在格式化代码..."
+        },
+        {
+          "name": "ESLint检查",
+          "type": "command",
+          "command": "eslint $FILE_PATH",
+          "message": "正在运行ESLint检查..."
+        }
+      ]
+    },
+    {
+      "name": "通用质量检查",
+      "type": "quality_check",
+      "checks": [
+        {
+          "name": "函数长度检查",
+          "max_function_lines": 50,
+          "message": "发现超长函数，建议拆分"
+        },
+        {
+          "name": "圈复杂度检查", 
+          "max_complexity": 10,
+          "message": "函数复杂度过高，建议简化"
+        },
+        {
+          "name": "嵌套深度检查",
+          "max_nesting": 4,
+          "message": "嵌套层次过深，建议重构"
+        }
+      ]
+    }
+  ],
+  "notifications": {
+    "success": "✅ 代码质量检查通过",
+    "warning": "⚠️ 发现代码质量问题，已自动修复",
+    "error": "❌ 代码质量检查失败，请手动修复"
+  },
+  "settings": {
+    "auto_fix": true,
+    "show_progress": true,
+    "timeout": 30
+  }
+}

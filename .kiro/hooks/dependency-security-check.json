@@ -1,0 +1,175 @@
+{
+  "name": "依赖安全检查",
+  "description": "定期检查依赖更新、安全漏洞和许可证合规性",
+  "trigger": {
+    "type": "scheduled",
+    "schedule": "daily",
+    "also_trigger_on": [
+      {
+        "type": "file_change",
+        "patterns": ["Cargo.toml", "Package.swift", "requirements.txt", "package.json", "pyproject.toml"]
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "依赖清单分析",
+      "type": "dependency_inventory",
+      "actions": [
+        {
+          "name": "Rust依赖分析",
+          "condition": "file_exists('Cargo.toml')",
+          "commands": [
+            "cargo tree",
+            "cargo audit",
+            "cargo outdated"
+          ],
+          "message": "分析Rust依赖..."
+        },
+        {
+          "name": "Swift依赖分析",
+          "condition": "file_exists('Package.swift')",
+          "commands": [
+            "swift package show-dependencies",
+            "swift package resolve"
+          ],
+          "message": "分析Swift依赖..."
+        },
+        {
+          "name": "Python依赖分析",
+          "condition": "file_exists('requirements.txt') || file_exists('pyproject.toml')",
+          "commands": [
+            "pip list --outdated",
+            "safety check",
+            "pip-audit"
+          ],
+          "message": "分析Python依赖..."
+        },
+        {
+          "name": "Node.js依赖分析",
+          "condition": "file_exists('package.json')",
+          "commands": [
+            "npm audit",
+            "npm outdated",
+            "npm ls"
+          ],
+          "message": "分析Node.js依赖..."
+        }
+      ]
+    },
+    {
+      "name": "安全漏洞检查",
+      "type": "vulnerability_scan",
+      "severity_levels": ["critical", "high", "medium"],
+      "actions": [
+        {
+          "name": "CVE数据库检查",
+          "script": "检查已知CVE漏洞"
+        },
+        {
+          "name": "依赖链分析",
+          "script": "分析传递依赖的安全风险"
+        },
+        {
+          "name": "许可证合规检查",
+          "allowed_licenses": [
+            "MIT", "Apache-2.0", "BSD-3-Clause", "BSD-2-Clause", 
+            "ISC", "MPL-2.0", "LGPL-2.1", "LGPL-3.0"
+          ],
+          "forbidden_licenses": ["GPL-3.0", "AGPL-3.0", "SSPL-1.0"]
+        }
+      ]
+    },
+    {
+      "name": "依赖更新建议",
+      "type": "update_recommendations",
+      "policies": {
+        "patch_updates": "auto_suggest",
+        "minor_updates": "manual_review", 
+        "major_updates": "manual_review_required",
+        "security_updates": "high_priority"
+      },
+      "actions": [
+        {
+          "name": "生成更新计划",
+          "output": ".kiro/reports/dependency-update-plan.md"
+        },
+        {
+          "name": "评估更新风险",
+          "factors": ["breaking_changes", "compatibility", "stability"]
+        }
+      ]
+    },
+    {
+      "name": "依赖质量评估",
+      "type": "quality_assessment",
+      "criteria": [
+        {
+          "name": "维护活跃度",
+          "metrics": ["last_commit", "release_frequency", "issue_response_time"]
+        },
+        {
+          "name": "社区健康度",
+          "metrics": ["stars", "forks", "contributors", "downloads"]
+        },
+        {
+          "name": "代码质量",
+          "metrics": ["test_coverage", "documentation", "code_review_process"]
+        }
+      ]
+    },
+    {
+      "name": "依赖优化建议",
+      "type": "optimization_suggestions",
+      "actions": [
+        {
+          "name": "识别重复依赖",
+          "script": "查找功能重复的依赖包"
+        },
+        {
+          "name": "分析包大小影响",
+          "script": "评估依赖对最终包大小的影响"
+        },
+        {
+          "name": "建议轻量级替代方案",
+          "script": "推荐更轻量的替代依赖"
+        }
+      ]
+    }
+  ],
+  "alerts": [
+    {
+      "condition": "critical_vulnerability_found",
+      "action": "immediate_notification",
+      "message": "🚨 发现严重安全漏洞，需要立即处理"
+    },
+    {
+      "condition": "forbidden_license_detected", 
+      "action": "block_build",
+      "message": "❌ 检测到禁用许可证，构建已阻止"
+    },
+    {
+      "condition": "outdated_dependencies > 10",
+      "action": "weekly_reminder",
+      "message": "📅 有多个依赖需要更新，建议安排更新计划"
+    }
+  ],
+  "reports": [
+    {
+      "name": "依赖安全报告",
+      "output": ".kiro/reports/dependency-security-report.html",
+      "schedule": "weekly"
+    },
+    {
+      "name": "依赖更新摘要",
+      "output": ".kiro/reports/dependency-update-summary.md", 
+      "schedule": "monthly"
+    }
+  ],
+  "settings": {
+    "cache_vulnerability_data": true,
+    "cache_duration": "24h",
+    "parallel_checks": true,
+    "timeout": 180
+  }
+}

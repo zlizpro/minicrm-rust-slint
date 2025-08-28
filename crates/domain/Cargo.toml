@@ -1,0 +1,13 @@
+[package]
+name = "minicrm-domain"
+version = "0.1.0"
+edition = "2021"
+description = "MiniCRM 领域模块 - 业务实体和领域服务"
+
+[dependencies]
+minicrm-core = { path = "../core" }
+serde = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+validator = { workspace = true }
+async-trait = { workspace = true }

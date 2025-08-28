@@ -1,0 +1,50 @@
+// MiniCRM 通用UI组件库
+// 定义可复用的UI组件
+
+import { Button, VerticalBox, HorizontalBox, Text, Rectangle } from "std-widgets.slint";
+
+// 通用卡片组件
+export component Card {
+    in property <string> title: "卡片标题";
+    in property <length> card-width: 200px;
+    in property <length> card-height: 150px;
+
+    width: card-width;
+    height: card-height;
+
+    Rectangle {
+        background: white;
+        border-width: 1px;
+        border-color: #dee2e6;
+        border-radius: 8px;
+        drop-shadow-blur: 4px;
+        drop-shadow-color: #00000020;
+
+        VerticalBox {
+            padding: 16px;
+            spacing: 8px;
+
+            Text {
+                text: title;
+                font-size: 16px;
+                font-weight: 600;
+                color: #495057;
+            }
+
+            @children
+        }
+    }
+}
+
+// 通用按钮组件
+export component PrimaryButton {
+    in property <string> text: "按钮";
+    callback clicked();
+
+    Button {
+        text: text;
+        clicked => {
+            root.clicked();
+        }
+    }
+}

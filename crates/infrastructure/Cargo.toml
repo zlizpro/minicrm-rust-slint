@@ -1,0 +1,21 @@
+[package]
+name = "minicrm-infrastructure"
+version = "0.1.0"
+edition = "2021"
+description = "MiniCRM 基础设施模块 - 数据库、外部服务等"
+
+[dependencies]
+minicrm-core = { path = "../core" }
+rusqlite = { workspace = true }
+r2d2 = { workspace = true }
+r2d2_sqlite = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3.8"

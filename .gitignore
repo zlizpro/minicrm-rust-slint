@@ -1,0 +1,133 @@
+# MiniCRM Git忽略文件配置
+# 排除不需要版本控制的文件和目录
+
+# Rust编译产物
+/target/
+**/*.rs.bk
+*.pdb
+
+# Cargo相关
+# 注意：对于应用程序项目，Cargo.lock应该被包含在版本控制中
+# 只有库项目才应该排除Cargo.lock
+# .cargo/config.toml包含项目特定配置，应该被包含
+
+# IDE和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 日志文件
+*.log
+logs/
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# 配置文件（包含敏感信息）
+config/local.toml
+.env
+.env.local
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+*.temp
+
+# 备份文件
+*.bak
+*.backup
+*~
+
+# 文档生成
+/doc/
+/docs/book/
+
+# 测试覆盖率报告
+tarpaulin-report.html
+cobertura.xml
+lcov.info
+
+# 性能分析文件
+*.prof
+perf.data*
+flamegraph.svg
+
+# 安全审计
+audit.json
+
+# 依赖缓存
+vendor/
+
+# 构建缓存
+.cache/
+
+# 发布产物
+dist/
+release/
+
+# 平台特定
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 包管理器
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 其他工具
+.nyc_output
+coverage/
+*.lcov
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Visual Studio Code
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+.history/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+Session.vim
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# 项目特定
+# 添加项目特定的忽略规则

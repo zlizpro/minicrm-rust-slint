@@ -1,0 +1,212 @@
+{
+  "name": "文档自动更新",
+  "description": "代码变更时自动生成和更新API文档、README和开发文档",
+  "trigger": {
+    "type": "file_change",
+    "patterns": [
+      "**/*.rs", "**/*.swift", "**/*.py", "**/*.ts", "**/*.js",
+      "**/README.md", "**/CHANGELOG.md", "**/*.toml", "**/package.json"
+    ]
+  },
+  "actions": [
+    {
+      "name": "API文档生成",
+      "type": "api_documentation",
+      "actions": [
+        {
+          "name": "Rust文档生成",
+          "condition": "has_rust_changes",
+          "commands": [
+            "cargo doc --no-deps --document-private-items",
+            "cargo doc --open --no-deps"
+          ],
+          "output": "target/doc/",
+          "message": "生成Rust API文档..."
+        },
+        {
+          "name": "Swift文档生成",
+          "condition": "has_swift_changes",
+          "commands": [
+            "swift-doc generate Sources/ --output docs/swift/",
+            "sourcedocs generate --output-folder docs/swift-docs/"
+          ],
+          "output": "docs/swift/",
+          "message": "生成Swift API文档..."
+        },
+        {
+          "name": "Python文档生成",
+          "condition": "has_python_changes",
+          "commands": [
+            "sphinx-apidoc -o docs/source/ .",
+            "sphinx-build -b html docs/source/ docs/build/"
+          ],
+          "output": "docs/build/",
+          "message": "生成Python API文档..."
+        },
+        {
+          "name": "TypeScript文档生成",
+          "condition": "has_ts_changes",
+          "commands": [
+            "typedoc --out docs/typescript/ src/",
+            "api-extractor run"
+          ],
+          "output": "docs/typescript/",
+          "message": "生成TypeScript API文档..."
+        }
+      ]
+    },
+    {
+      "name": "README自动更新",
+      "type": "readme_maintenance",
+      "actions": [
+        {
+          "name": "API变更检测",
+          "script": "检测公共API的变更"
+        },
+        {
+          "name": "示例代码更新",
+          "script": "更新README中的代码示例"
+        },
+        {
+          "name": "功能列表同步",
+          "script": "同步功能列表与实际实现"
+        },
+        {
+          "name": "依赖信息更新",
+          "script": "更新依赖版本和安装说明"
+        }
+      ]
+    },
+    {
+      "name": "CHANGELOG生成",
+      "type": "changelog_generation",
+      "format": "keep-a-changelog",
+      "actions": [
+        {
+          "name": "Git提交分析",
+          "script": "分析Git提交历史生成变更日志"
+        },
+        {
+          "name": "语义化版本建议",
+          "script": "根据变更类型建议版本号"
+        },
+        {
+          "name": "破坏性变更检测",
+          "script": "检测API破坏性变更"
+        }
+      ]
+    },
+    {
+      "name": "代码示例验证",
+      "type": "example_validation",
+      "actions": [
+        {
+          "name": "提取文档中的代码",
+          "patterns": ["```rust", "```swift", "```python", "```typescript"]
+        },
+        {
+          "name": "编译验证代码示例",
+          "script": "确保文档中的代码示例可以编译运行"
+        },
+        {
+          "name": "运行示例测试",
+          "script": "执行文档中的示例代码"
+        }
+      ]
+    },
+    {
+      "name": "文档质量检查",
+      "type": "documentation_quality",
+      "checks": [
+        {
+          "name": "覆盖率检查",
+          "script": "检查公共API的文档覆盖率"
+        },
+        {
+          "name": "链接有效性检查",
+          "script": "验证文档中的所有链接"
+        },
+        {
+          "name": "拼写检查",
+          "tools": ["aspell", "hunspell"],
+          "languages": ["en_US", "zh_CN"]
+        },
+        {
+          "name": "格式一致性检查",
+          "script": "检查文档格式的一致性"
+        }
+      ]
+    },
+    {
+      "name": "多语言文档同步",
+      "type": "i18n_documentation",
+      "languages": ["zh-CN", "en-US"],
+      "actions": [
+        {
+          "name": "检测文档变更",
+          "script": "识别需要翻译的文档变更"
+        },
+        {
+          "name": "生成翻译任务",
+          "output": ".kiro/tasks/translation-tasks.md"
+        },
+        {
+          "name": "同步文档结构",
+          "script": "确保各语言版本的文档结构一致"
+        }
+      ]
+    },
+    {
+      "name": "文档部署准备",
+      "type": "deployment_preparation",
+      "actions": [
+        {
+          "name": "静态站点生成",
+          "tools": {
+            "rust": "mdbook",
+            "swift": "swift-doc",
+            "python": "sphinx",
+            "typescript": "docusaurus"
+          }
+        },
+        {
+          "name": "搜索索引生成",
+          "script": "为文档生成搜索索引"
+        },
+        {
+          "name": "文档压缩优化",
+          "script": "优化文档资源大小"
+        }
+      ]
+    }
+  ],
+  "quality_gates": [
+    {
+      "name": "文档覆盖率",
+      "threshold": 80,
+      "message": "公共API文档覆盖率不足80%"
+    },
+    {
+      "name": "示例代码验证",
+      "requirement": "all_examples_compile",
+      "message": "文档中存在无法编译的示例代码"
+    },
+    {
+      "name": "链接有效性",
+      "requirement": "no_broken_links",
+      "message": "文档中存在失效链接"
+    }
+  ],
+  "notifications": {
+    "documentation_updated": "📚 文档已自动更新",
+    "api_changes_detected": "🔄 检测到API变更，文档需要更新",
+    "documentation_quality_issue": "⚠️ 文档质量检查发现问题",
+    "translation_needed": "🌐 检测到需要翻译的内容"
+  },
+  "settings": {
+    "auto_commit_docs": false,
+    "create_pull_request": true,
+    "pr_title_template": "docs: 自动更新文档 - {timestamp}",
+    "timeout": 240
+  }
+}

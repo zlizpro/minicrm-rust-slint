@@ -1,0 +1,249 @@
+{
+  "name": "性能监控和优化",
+  "description": "监控构建性能、运行时性能和代码复杂度，提供优化建议",
+  "trigger": {
+    "type": "multiple",
+    "triggers": [
+      {
+        "type": "file_change",
+        "patterns": ["**/*.rs", "**/*.swift", "**/*.py", "**/*.ts"]
+      },
+      {
+        "type": "git_push"
+      },
+      {
+        "type": "scheduled",
+        "schedule": "weekly"
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "构建性能监控",
+      "type": "build_performance",
+      "actions": [
+        {
+          "name": "Rust构建性能",
+          "condition": "has_rust_files",
+          "commands": [
+            "cargo build --timings",
+            "cargo bloat --release --crates"
+          ],
+          "metrics": ["compile_time", "binary_size", "dependency_compile_time"],
+          "message": "监控Rust构建性能..."
+        },
+        {
+          "name": "Swift构建性能",
+          "condition": "has_swift_files",
+          "commands": [
+            "swift build --verbose",
+            "swift build -c release"
+          ],
+          "metrics": ["compile_time", "binary_size"],
+          "message": "监控Swift构建性能..."
+        },
+        {
+          "name": "Python包大小分析",
+          "condition": "has_python_files",
+          "commands": [
+            "python setup.py bdist_wheel",
+            "wheel unpack dist/*.whl"
+          ],
+          "metrics": ["package_size", "import_time"],
+          "message": "分析Python包性能..."
+        },
+        {
+          "name": "TypeScript构建性能",
+          "condition": "has_ts_files",
+          "commands": [
+            "npm run build -- --stats",
+            "webpack-bundle-analyzer dist/main.js"
+          ],
+          "metrics": ["bundle_size", "compile_time", "chunk_sizes"],
+          "message": "监控TypeScript构建性能..."
+        }
+      ]
+    },
+    {
+      "name": "代码复杂度分析",
+      "type": "complexity_analysis",
+      "tools": {
+        "rust": "cargo-complexity",
+        "swift": "swiftlint --reporter json",
+        "python": "radon cc . --json",
+        "typescript": "complexity-report"
+      },
+      "thresholds": {
+        "cyclomatic_complexity": 10,
+        "cognitive_complexity": 15,
+        "maintainability_index": 20
+      },
+      "actions": [
+        {
+          "name": "识别复杂函数",
+          "script": "标记超过复杂度阈值的函数"
+        },
+        {
+          "name": "生成重构建议",
+          "output": ".kiro/suggestions/refactoring-suggestions.md"
+        }
+      ]
+    },
+    {
+      "name": "内存使用分析",
+      "type": "memory_analysis",
+      "actions": [
+        {
+          "name": "Rust内存分析",
+          "condition": "has_rust_files",
+          "tools": ["valgrind", "heaptrack"],
+          "commands": [
+            "cargo test --release",
+            "valgrind --tool=massif target/release/main"
+          ]
+        },
+        {
+          "name": "Python内存分析",
+          "condition": "has_python_files",
+          "tools": ["memory_profiler", "pympler"],
+          "commands": [
+            "python -m memory_profiler main.py",
+            "mprof run main.py && mprof plot"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "性能基准测试",
+      "type": "benchmarking",
+      "actions": [
+        {
+          "name": "Rust基准测试",
+          "condition": "has_rust_files",
+          "command": "cargo bench",
+          "output": "target/criterion/",
+          "message": "运行Rust基准测试..."
+        },
+        {
+          "name": "Swift性能测试",
+          "condition": "has_swift_files", 
+          "command": "swift test --enable-test-discovery -c release",
+          "message": "运行Swift性能测试..."
+        },
+        {
+          "name": "Python性能测试",
+          "condition": "has_python_files",
+          "command": "pytest --benchmark-only",
+          "message": "运行Python基准测试..."
+        },
+        {
+          "name": "TypeScript性能测试",
+          "condition": "has_ts_files",
+          "command": "npm run benchmark",
+          "message": "运行TypeScript性能测试..."
+        }
+      ]
+    },
+    {
+      "name": "性能回归检测",
+      "type": "regression_detection",
+      "actions": [
+        {
+          "name": "对比历史性能",
+          "script": "比较当前性能与历史基线"
+        },
+        {
+          "name": "识别性能回归",
+          "thresholds": {
+            "build_time_increase": 20,
+            "binary_size_increase": 15,
+            "benchmark_regression": 10
+          }
+        },
+        {
+          "name": "生成性能报告",
+          "output": ".kiro/reports/performance-report.html"
+        }
+      ]
+    },
+    {
+      "name": "优化建议生成",
+      "type": "optimization_suggestions",
+      "categories": [
+        {
+          "name": "编译优化",
+          "suggestions": [
+            "启用LTO链接时优化",
+            "调整代码生成单元数量",
+            "使用目标CPU优化"
+          ]
+        },
+        {
+          "name": "算法优化",
+          "suggestions": [
+            "使用更高效的数据结构",
+            "减少不必要的内存分配",
+            "优化热点代码路径"
+          ]
+        },
+        {
+          "name": "依赖优化",
+          "suggestions": [
+            "移除未使用的依赖",
+            "使用轻量级替代方案",
+            "启用依赖特性门控"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "性能监控仪表板",
+      "type": "dashboard_generation",
+      "actions": [
+        {
+          "name": "生成性能图表",
+          "charts": ["build_time_trend", "binary_size_trend", "benchmark_results"]
+        },
+        {
+          "name": "创建性能摘要",
+          "output": ".kiro/dashboard/performance-summary.html"
+        }
+      ]
+    }
+  ],
+  "alerts": [
+    {
+      "condition": "build_time_increase > 50%",
+      "action": "immediate_alert",
+      "message": "🚨 构建时间显著增加，需要优化"
+    },
+    {
+      "condition": "binary_size_increase > 30%",
+      "action": "warning",
+      "message": "⚠️ 二进制文件大小显著增加"
+    },
+    {
+      "condition": "benchmark_regression > 20%",
+      "action": "block_merge",
+      "message": "❌ 检测到严重性能回归，阻止合并"
+    }
+  ],
+  "reports": [
+    {
+      "name": "每周性能报告",
+      "output": ".kiro/reports/weekly-performance-report.md",
+      "schedule": "weekly"
+    },
+    {
+      "name": "性能优化建议",
+      "output": ".kiro/suggestions/performance-optimizations.md",
+      "trigger": "on_regression"
+    }
+  ],
+  "settings": {
+    "baseline_update_frequency": "monthly",
+    "keep_history_days": 90,
+    "parallel_benchmarks": true,
+    "timeout": 600
+  }
+}

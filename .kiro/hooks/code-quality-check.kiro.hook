@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "代码质量检查",
+  "description": "文件保存时自动进行代码格式化和质量检查",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.rs",
+      "**/*.swift",
+      "**/*.py",
+      "**/*.ts",
+      "**/*.js"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "🔍 正在进行代码质量检查...\n\n请执行以下代码质量检查脚本：\n\n```bash\n#!/bin/bash\necho \"🔍 正在进行代码质量检查...\"\n\n# 检查文件大小\nif [ -f \"$KIRO_FILE_PATH\" ]; then\n  lines=$(wc -l < \"$KIRO_FILE_PATH\")\n  if [ $lines -gt 500 ]; then\n    echo \"⚠️ 警告: 文件超过500行 ($lines 行)，建议拆分\"\n  fi\nfi\n\n# 根据项目类型执行检查\nif [ -f \"Cargo.toml\" ]; then\n  echo \"🦀 Rust项目检查...\"\n  cargo fmt --check || cargo fmt\n  cargo clippy --quiet\nelif [ -f \"Package.swift\" ]; then\n  echo \"🍎 Swift项目检查...\"\n  swift-format format --in-place \"$KIRO_FILE_PATH\" 2>/dev/null || true\nelif [ -f \"requirements.txt\" ] || [ -f \"pyproject.toml\" ]; then\n  echo \"🐍 Python项目检查...\"\n  black --check \"$KIRO_FILE_PATH\" || black \"$KIRO_FILE_PATH\"\nelif [ -f \"package.json\" ]; then\n  echo \"📦 Node.js项目检查...\"\n  prettier --check \"$KIRO_FILE_PATH\" || prettier --write \"$KIRO_FILE_PATH\"\nfi\n\necho \"✅ 代码质量检查完成\"\n```\n\n请运行此脚本来检查和格式化代码，确保代码质量符合项目标准。"
+  }
+}

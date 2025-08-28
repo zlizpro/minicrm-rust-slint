@@ -1,0 +1,125 @@
+{
+  "name": "测试覆盖率监控",
+  "description": "代码变更后自动运行相关测试并监控覆盖率变化",
+  "trigger": {
+    "type": "file_change",
+    "patterns": ["**/*.rs", "**/*.swift", "**/*.py", "**/*.ts", "**/*.js"],
+    "exclude_patterns": ["**/tests/**", "**/*_test.*", "**/*.test.*"]
+  },
+  "actions": [
+    {
+      "name": "识别变更影响",
+      "type": "impact_analysis",
+      "script": "分析代码变更影响的模块和测试"
+    },
+    {
+      "name": "运行相关测试",
+      "type": "selective_testing",
+      "actions": [
+        {
+          "name": "Rust增量测试",
+          "condition": "has_rust_changes",
+          "command": "cargo test --lib --bins",
+          "coverage_command": "cargo tarpaulin --out Html --output-dir coverage/",
+          "message": "运行Rust相关测试..."
+        },
+        {
+          "name": "Swift增量测试", 
+          "condition": "has_swift_changes",
+          "command": "swift test --enable-code-coverage",
+          "coverage_command": "xcrun llvm-cov show .build/debug/PackageTests.xctest/Contents/MacOS/PackageTests",
+          "message": "运行Swift相关测试..."
+        },
+        {
+          "name": "Python增量测试",
+          "condition": "has_python_changes",
+          "command": "pytest --cov=. --cov-report=html --cov-report=term-missing",
+          "message": "运行Python相关测试..."
+        },
+        {
+          "name": "TypeScript增量测试",
+          "condition": "has_ts_changes",
+          "command": "npm test -- --coverage --watchAll=false",
+          "message": "运行TypeScript相关测试..."
+        }
+      ]
+    },
+    {
+      "name": "覆盖率分析",
+      "type": "coverage_analysis",
+      "thresholds": {
+        "line_coverage": {
+          "target": 80.0,
+          "minimum": 70.0,
+          "warning": 75.0
+        },
+        "branch_coverage": {
+          "target": 70.0,
+          "minimum": 60.0,
+          "warning": 65.0
+        },
+        "function_coverage": {
+          "target": 85.0,
+          "minimum": 75.0,
+          "warning": 80.0
+        }
+      }
+    },
+    {
+      "name": "覆盖率趋势分析",
+      "type": "trend_analysis",
+      "actions": [
+        {
+          "name": "对比历史覆盖率",
+          "script": "比较当前覆盖率与历史数据"
+        },
+        {
+          "name": "识别覆盖率下降",
+          "threshold": -5.0,
+          "action": "warning"
+        },
+        {
+          "name": "生成覆盖率报告",
+          "output": ".kiro/reports/coverage-report.html"
+        }
+      ]
+    },
+    {
+      "name": "未覆盖代码分析",
+      "type": "uncovered_analysis",
+      "actions": [
+        {
+          "name": "识别关键未覆盖代码",
+          "priority": ["error_handling", "business_logic", "public_api"]
+        },
+        {
+          "name": "生成测试建议",
+          "output": ".kiro/suggestions/test-suggestions.md"
+        }
+      ]
+    }
+  ],
+  "notifications": {
+    "coverage_improved": "📈 测试覆盖率提升: {old_coverage}% → {new_coverage}%",
+    "coverage_decreased": "📉 测试覆盖率下降: {old_coverage}% → {new_coverage}%",
+    "coverage_below_threshold": "⚠️ 测试覆盖率低于阈值: {current_coverage}% < {threshold}%",
+    "tests_failed": "❌ 测试失败: {failed_count} 个测试未通过"
+  },
+  "actions_on_low_coverage": [
+    {
+      "name": "生成测试模板",
+      "type": "generate_test_templates",
+      "output": "tests/generated/"
+    },
+    {
+      "name": "标记需要测试的函数",
+      "type": "mark_untested_functions"
+    }
+  ],
+  "settings": {
+    "run_on_save": false,
+    "run_on_commit": true,
+    "cache_results": true,
+    "timeout": 120
+  }
+}

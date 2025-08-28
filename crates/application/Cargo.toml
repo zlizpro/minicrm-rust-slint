@@ -1,0 +1,13 @@
+[package]
+name = "minicrm-application"
+version = "0.1.0"
+edition = "2021"
+description = "MiniCRM 应用层 - 用例和应用服务"
+
+[dependencies]
+minicrm-core = { path = "../core" }
+minicrm-domain = { path = "../domain" }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }
+anyhow = { workspace = true }
